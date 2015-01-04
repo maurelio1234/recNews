@@ -78,7 +78,7 @@ def classify(cat, text, explain=False):
 		p_w_cat_true = p_w_cat(w, True)
 		p_w_cat_false = p_w_cat(w, False)
 		if explain: print '{0:24s}: {1:>5.1%} {2:>5.1%}'.format(w, p_w_cat_true, p_w_cat_false)
-		if explain: print 'hi'
+		
 		if p_w_cat_true:
 			p_t_true = p_t_true + math.log10(p_w_cat_true)
 		if p_w_cat_false:
@@ -90,7 +90,10 @@ def classify(cat, text, explain=False):
 	prediction = math.pow(p_t_true,10) > math.pow(p_t_false,10)
 		
 	if explain: print 'Prediction: ' + str(prediction)
-	return prediction
+	if prediction:
+		return math.pow(p_t_true,10)
+	else:
+		return False
 	
 def test_dataset():
 	print 'Initializing...'
@@ -103,31 +106,29 @@ def test_dataset():
 	print
 	
 	print 'Positives:'
-	for i, entry in enumerate(f['entries']):
-		#print entry
+	
+	def get_classification(entry):
 		text = entry['title'] + ' ' + entry['summary']
 		text = text.partition('.')[0] # it probably only works for liberation feed...
 																	# lt gets crazy when you feed it html
 																	# TODO: find another solution
+		return (classify(cat, text), text, entry)
 		
-		if classify(cat, text):
-			print '{0})'.format(i+1),
-			print_link(text, entry['links'][0]['href'])	
-			print
-			print
-
-	print 		
-	print 'Negatives:'
-	for i, entry in enumerate(f['entries']):
+	def get_key(csf):
+		(cs,t,e) = csf
+		return cs
+	
+	classified = [get_classification(entry) for entry in f['entries'] if get_classification(entry)[0]]
+	sorted_classified = sorted(classified, key=get_key,reverse=True )
+	
+	for i, classification in enumerate(sorted_classified):
+		(cs, text, entry) = classification
+		
 		#print entry
-		text = entry['title'] + ' ' + entry['summary']
-		text = text.partition('.')[0] # it probably only works for liberation feed...
-		
-		if not classify(cat, text):
-			print '{0})'.format(i+1),
-			print_link(text, entry['links'][0]['href'])	
-			print
-			print
+		print '{0})'.format(i+1),
+		print_link(text, entry['links'][0]['href'])	
+		print
+		print
 			
 #classify()
 #build_training_set()
