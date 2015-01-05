@@ -4,6 +4,9 @@ import feedparser
 import linguistictagger as lt
 import pickle
 import math
+import sys
+import urllib
+import string
 
 def print_link(title, link):
 	try:
@@ -72,8 +75,6 @@ def classify(cat, text, explain=False):
 	p_t_true = 0.0
 	p_t_false = 0.0
 	
-	if explain: print nouns
-	
 	for w in nouns:
 		p_w_cat_true = p_w_cat(w, True)
 		p_w_cat_false = p_w_cat(w, False)
@@ -96,6 +97,7 @@ def classify(cat, text, explain=False):
 		return False
 	
 def test_dataset():
+	print
 	print 'Initializing...'
 	dataset = load_dataset()
 	cat = process_dataset(dataset)
@@ -124,14 +126,45 @@ def test_dataset():
 	for i, classification in enumerate(sorted_classified):
 		(cs, text, entry) = classification
 		
-		#print entry
 		print '{0})'.format(i+1),
-		print_link(text, entry['links'][0]['href'])	
+		print_link(text, entry['links'][0]['href'])
+		print '[ ',
+		print_link('explain', 'pythonista://recNews/main?'+urllib.urlencode(
+		                                                       [('action', 'run'),
+		                                                        ('argv', 'explain'), 
+		                                                        ('argv',text)]))
+		print ']'
 		print
 		print
-			
-#classify()
-#build_training_set()
-test_dataset()
 
-# TODO add explain link close to each result in test using pythonista URL schema
+def explain(text):
+	print
+	print 'Initializing...'
+	dataset = load_dataset()
+	cat = process_dataset(dataset)
+	classify(cat, text, explain=True)
+	
+def show_menu():
+	print
+	print 'Menu'
+	print '===='
+	print
+	print '1) Train classifier'
+	print '2) Test dataset'
+	choice = raw_input(': ')
+	print
+	
+	if choice == '1':
+		build_training_set()
+	else:
+		test_dataset()
+
+if len(sys.argv)==1:
+	show_menu()
+else:
+	cmd = sys.argv[1]
+	if cmd == 'showNews':
+		test_dataset()
+	elif cmd == 'explain':
+		s = string.replace(sys.argv[2], '+', ' ') # TODO why doesn't it unpack these strings correctly?
+		explain(s)
