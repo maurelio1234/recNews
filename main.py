@@ -29,7 +29,10 @@ def save_dataset(dataset):
 		pickle.dump(dataset,g)
 			
 def build_training_set():
+	print
+	print 'Loading feed...'
 	f = feedparser.parse('http://www.lepoint.fr/24h-infos/rss.xml')
+	print 'Loading dataset...'
 	dataset = load_dataset()
 	
 	print 'Extending dataset'
@@ -104,9 +107,7 @@ def test_dataset():
 	
 	print 'Loading feed...'
 	f = feedparser.parse('http://rss.liberation.fr/rss/9/')
-	print 'done'
 	print
-	
 	print 'Positives:'
 	
 	def get_classification(entry):
