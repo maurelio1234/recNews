@@ -7,6 +7,8 @@ import math
 import sys
 import urllib
 import string
+import shutil
+from datetime import datetime
 
 def print_link(title, link):
 	try:
@@ -25,9 +27,13 @@ def load_dataset():
 		return None 
 			
 def save_dataset(dataset):
+	backup_dataset()
 	with open('dataset', 'wb') as g:
 		pickle.dump(dataset,g)
-			
+
+def backup_dataset():
+	shutil.copyfile('dataset', 'dataset.old.{:%Y%m%d}'.format(datetime.now()))
+	
 def build_training_set():
 	print
 	print 'Loading feed...'
